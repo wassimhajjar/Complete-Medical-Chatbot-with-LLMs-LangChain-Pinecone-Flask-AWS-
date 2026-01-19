@@ -3,7 +3,18 @@ from langchain_classic.text_splitter import RecursiveCharacterTextSplitter
 from typing import List
 from langchain_classic.schema import Document
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from src.db_methods import save_message
+# from langchain_huggingface import HuggingFaceEmbeddings
+from src.db_methods import save_message,get_session_history
+from dotenv import load_dotenv
+from langchain_pinecone import PineconeVectorStore
+import os
+from src.gemini_script import RotatingGemini
+from langchain_classic.chains import create_history_aware_retriever, create_retrieval_chain
+from langchain_classic.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.prompts import ChatPromptTemplate,MessagesPlaceholder
+from langchain_core.runnables.history import RunnableWithMessageHistory
+from src.prompt import *
+
 
 
 #Extract data from pdf files
@@ -67,4 +78,57 @@ def invoke_and_save(session_id, input_text,conversational_rag_chain):
     save_message(session_id, "ai", result)
     return result
 
+def initialize():
+    load_dotenv()
+    #load the model
+    PINECONE_API_KEY=os.getenv("PINECONE_API_KEY")
+    keys=[os.getenv("GEMINI_API_KEY_1"),os.getenv("GEMINI_API_KEY_2"),os.getenv("GEMINI_API_KEY_3")]
+
+    os.environ["PINECONE_API_KEY"]=PINECONE_API_KEY
+    keys = [k for k in keys if k]
+    chatModel = RotatingGemini(api_keys=keys)
+    embeddings=download_hugging_face_embeddings()
+
+    index_name="medical-chatbot"
+
+    #Embed each chunk and upsert the embeddings into the Pinecone index.
+    docsearch=PineconeVectorStore.from_existing_index(
+        index_name=index_name,
+        embedding=embeddings
+    )
+
+    retriever=docsearch.as_retriever(search_type="similarity",search_kwargs={"k":3})
+    
+    contextualize_q_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", contextualize_q_system_prompt),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{input}"),
+    ]
+    )
+    history_aware_retriever = create_history_aware_retriever(
+    chatModel, retriever, contextualize_q_prompt
+    )
+
+    qa_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", qa_system_prompt),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{input}"),
+    ]
+    )
+    question_answer_chain = create_stuff_documents_chain(chatModel, qa_prompt)
+
+    rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
+
+    store = {}
+
+    conversational_rag_chain = RunnableWithMessageHistory(
+        rag_chain,
+        get_session_history,
+        input_messages_key="input",
+        history_messages_key="chat_history",
+        output_messages_key="answer",
+    )
+    return conversational_rag_chain 
 

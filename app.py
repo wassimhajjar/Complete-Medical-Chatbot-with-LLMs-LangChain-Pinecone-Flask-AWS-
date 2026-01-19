@@ -1,17 +1,17 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, request
 from src.helper import download_hugging_face_embeddings, invoke_and_save
 from langchain_pinecone import PineconeVectorStore
-from langchain_google_genai import ChatGoogleGenerativeAI
+# from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_classic.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
-from langchain_huggingface import ChatHuggingFace
+# from langchain_huggingface import ChatHuggingFace
 from langchain_core.prompts import ChatPromptTemplate,MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from dotenv import load_dotenv
-from src.db_methods import get_session_history,load_session_history
+from src.db_methods import get_session_history,
 from src.prompt import *
 from src.gemini_script import RotatingGemini
-from src.upload_files import UploadResponse
+
 import os
 import uuid
 
@@ -27,6 +27,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
+from src.upload_files import UploadResponse,ChatRequest ,ChatResponse
 
 app= FastAPI(title="MedicalChatbot",version="0.1.0")
 
@@ -72,34 +73,34 @@ def home(request: Request) -> HTMLResponse:
     return templates.TemplateResponse("chat.html", {"request": request})
 
 
-@app.post("/upload", response_model=UploadResponse)
-async def upload(files: List[UploadFile] = File(...)) -> UploadResponse:
-    # if not files:
-    #     raise HTTPException(status_code=400, detail="No files uploaded")
+# @app.post("/upload", response_model=UploadResponse)
+# async def upload(files: List[UploadFile] = File(...)) -> UploadResponse:
+#     # if not files:
+#     #     raise HTTPException(status_code=400, detail="No files uploaded")
 
-    # try:
-        # Wrap FastAPI files to preserve filename/ext and provide a read buffer
-        wrapped_files = [FastAPIFileAdapter(f) for f in files]
+#     # try:
+#         # Wrap FastAPI files to preserve filename/ext and provide a read buffer
+#         wrapped_files = [FastAPIFileAdapter(f) for f in files]
 
-        ingestor = ChatIngestor(use_session_dirs=True)
-        session_id = ingestor.session_id
+#         ingestor = ChatIngestor(use_session_dirs=True)
+#         session_id = ingestor.session_id
 
-        # Save, load, split, embed, and write FAISS index with MMR
-        ingestor.built_retriver(
-            uploaded_files=wrapped_files,
-            search_type="mmr",
-            fetch_k=20,
-            lambda_mult=0.5
-        )
+#         # Save, load, split, embed, and write FAISS index with MMR
+#         ingestor.built_retriver(
+#             uploaded_files=wrapped_files,
+#             search_type="mmr",
+#             fetch_k=20,
+#             lambda_mult=0.5
+#         )
 
-        # Initialize empty history for this session
-        SESSIONS[session_id] = []
+#         # Initialize empty history for this session
+#         SESSIONS[session_id] = []
 
-        return UploadResponse(session_id=session_id, indexed=True, message="Indexing complete with MMR")
-    # except DocumentPortalException as e:
-    #     raise HTTPException(status_code=500, detail=str(e))
-    # except Exception as e:
-    #     raise HTTPException(status_code=500, detail=f"Upload failed: {e}")
+#         return UploadResponse(session_id=session_id, indexed=True, message="Indexing complete with MMR")
+#     # except DocumentPortalException as e:
+#     #     raise HTTPException(status_code=500, detail=str(e))
+#     # except Exception as e:
+#     #     raise HTTPException(status_code=500, detail=f"Upload failed: {e}")
 
 
 @app.post("/chat", response_model=ChatResponse)
@@ -107,7 +108,7 @@ async def chat(req: ChatRequest) -> ChatResponse:
     session_id = req.session_id
     message = req.message.strip()
     if not session_id or session_id not in SESSIONS:
-        raise HTTPException(status_code=400, detail="Invalid or expired session_id. Re-upload documents.")
+        raise HTTPException(status_code=400, detail="Invalid or expired session_id.")
     if not message:
         raise HTTPException(status_code=400, detail="Message cannot be empty")
 
@@ -152,8 +153,8 @@ def main():
     print("Hello from chatbotapi")
 
 
-if __name__=="__main__":
-    app.
+# if __name__=="__main__":
+#     app.
 
 #initialise flask
 # app=Flask(__name__)
@@ -183,10 +184,6 @@ retriever=docsearch.as_retriever(search_type="similarity",search_kwargs={"k":3})
 #         ("system",system_prompt),
 #         ("human","{input}"),
 #     ]
-# )
-
-# question_answer_chain=create_stuff_documents_chain(chatModel,prompt)
-# rag_chain=create_retrieval_chain(retriever,question_answer_chain)
 
 contextualize_q_prompt = ChatPromptTemplate.from_messages(
     [

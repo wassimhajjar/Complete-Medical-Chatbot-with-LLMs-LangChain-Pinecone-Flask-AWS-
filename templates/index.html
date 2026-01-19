@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MultiDocChat</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Arial,
+          "Apple Color Emoji",
+          "Segoe UI Emoji";
+      }
+      header {
+        padding: 12px 16px;
+        border-bottom: 1px solid #ddd;
+      }
+      header h1 {
+        margin: 0;
+        font-size: 18px;
+      }
+      main {
+        max-width: 880px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+
+      #dropzone {
+        border: 2px dashed #888;
+        border-radius: 10px;
+        padding: 28px;
+        text-align: center;
+        margin-bottom: 12px;
+      }
+      #dropzone.hover {
+        border-color: #4f46e5;
+        background: rgba(79, 70, 229, 0.05);
+      }
+      .btn {
+        display: inline-block;
+        padding: 8px 12px;
+        background: #4f46e5;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      button {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background: #f5f5f5;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .hint {
+        font-size: 12px;
+        opacity: 0.8;
+        margin-left: 8px;
+      }
+
+      .messages {
+        height: 420px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        overflow: auto;
+        background: rgba(0, 0, 0, 0.02);
+      }
+      .bubble {
+        background-color: black;
+        padding: 10px 12px;
+        margin: 8px 0;
+        border-radius: 12px;
+        white-space: pre-wrap;
+      }
+      .bubble.human {
+        width: 50%;
+        margin-left: auto;
+        background: #4f46e5;
+        color: white;
+      }
+      .bubble.ai {
+        max-width: 80%;
+        margin-right: auto;
+        background: #e5e7eb;
+        color: #111827;
+      }
+
+      .composer {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+        align-items: center;
+      }
+      #message-input {
+        flex: 1;
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 20px;
+        transform: translateX(-50%);
+        background: #111827;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+    </style>
+    <script>
+      const $ = (sel) => document.querySelector(sel);
+      let sessionId = localStorage.getItem("mdc_session_id") || fetchsession();
+      async function sendMessage() {
+        const input = $("#message-input");
+        const text = input.value.trim();
+        if (!sessionId) {
+          toast("Please upload documents first.");
+          return;
+        }
+        if (!text) {
+          return;
+        }
+        appendMessage("human", text);
+        input.value = "";
+        toggleThinking(true);
+        try {
+          const res = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              session_id: 1,
+              content: text,
+              role: "human",
+            }),
+          });
+          if (!res.ok)
+            throw new Error((await res.json()).detail || "Chat failed");
+          const data = await res.json();
+          console.log("data2", data);
+          appendMessage("ai", data);
+        } catch (e) {
+          console.error(e);
+          toast("Thinking failed. Try again.");
+        } finally {
+          toggleThinking(false);
+        }
+      }
+
+      function appendMessage(role, text) {
+        console.log("role", role);
+        const container = $("#messages");
+        const bubble = document.createElement("div");
+        //if (role === "human") bubble.classList.add("bubble ai");
+        //else bubble.classList.add("bubble ai");
+        //if (role === "human") bubble.className = "bubble human";
+        //else bubble.classList.add("bubble ai");
+        bubble.className = "bubble " + (role === "human" ? "human" : "ai");
+        bubble.textContent = text;
+        container.appendChild(bubble);
+        container.scrollTop = container.scrollHeight;
+      }
+
+      function toggleThinking(on) {
+        $("#send-btn").disabled = on;
+        $("#thinking").style.display = on ? "inline-block" : "none";
+      }
+
+      //function toast(msg) {
+      //   const el = $("#toast");
+      //  el.textContent = msg;
+      //  el.style.opacity = "1";
+      //  setTimeout(() => (el.style.opacity = "0"), 2500);
+      //}
+
+      async function fetchsession() {
+        try {
+          const res = await fetch("/get-session", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          });
+          const data = await res.json();
+          const messages = data.messages;
+          console.log("data", data);
+          console.log("messages", messages);
+          messages.map((m) => appendMessage(m.type, m.content));
+        } catch (e) {
+          console.error(e);
+          toast("Thinking failed. Try again.");
+        } finally {
+          toggleThinking(false);
+        }
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        sessionId = fetchsession();
+        if (sessionId) {
+          $("#chat").style.display = "block";
+        }
+        $("#send-btn").addEventListener("click", sendMessage);
+        $("#message-input").addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+          }
+        });
+      });
+    </script>
+    <meta name="color-scheme" content="light dark" />
+  </head>
+  <body>
+    <header>
+      <h1>Medical ChatBot</h1>
+    </header>
+
+    <main>
+      <section id="chat">
+        <div id="messages" class="messages"></div>
+        <div class="composer">
+          <textarea
+            id="message-input"
+            rows="2"
+            placeholder="Ask for medical assistance…"
+          ></textarea>
+          <button
+            id="send-btn"
+            style="
+              background-color: rgb(0, 94, 225);
+              color: white;
+              border-radius: 6px;
+              cursor: pointer;
+            "
+          >
+            Send
+          </button>
+          <span id="thinking" class="hint" style="display: none"
+            >Thinking…</span
+          >
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+  </body>
+</html>

@@ -13,3 +13,8 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     answer:str
+
+class Message(BaseModel):
+    session_id:int
+    role:str
+    content:str
