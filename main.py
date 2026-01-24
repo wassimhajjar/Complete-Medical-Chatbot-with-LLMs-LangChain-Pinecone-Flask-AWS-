@@ -12,8 +12,13 @@ from app.util.protectRoute import get_current_user
 from app.db.schemas.user import UserOutput
 from contextlib import asynccontextmanager
 from app.util.db import create_tables
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
+front_end_url=os.getenv("FRONT_END_URL")
+os.environ("FRONT_END_URL")=front_end_url
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_tables()
@@ -26,7 +31,7 @@ app.include_router(dependencies=[Depends(get_current_user)],router=messageRouter
 
 
 origins = [
-    "http://localhost:5173",  # Default Vite React dev server
+    front_end_url,  # Default Vite React dev server
 ]
 
 app.add_middleware(
