@@ -23,7 +23,7 @@ def signUp(signUpDetails:UserInCreate,session:Session=Depends(get_db)):
         print(error)
         raise error
     
-@authRouter.get("/protected",status_code=200,response_model=UserOutput)
+@authRouter.get("/protected",status_code=200)
 def read_protected(user:UserOutput=Depends(get_current_user)):
     return user
     

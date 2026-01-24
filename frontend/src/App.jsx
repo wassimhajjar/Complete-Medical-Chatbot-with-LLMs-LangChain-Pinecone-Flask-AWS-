@@ -7,7 +7,7 @@ import { Toaster } from "react-hot-toast";
 
 const App = () => {
   const { user } = useAppContext();
-  // console.log("user", user);
+
   return (
     <>
       <Toaster />

@@ -5,9 +5,12 @@ from app.db.schemas.message import MessageInCreate,MessageOutput
 from typing import List
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer
-from main import conversational_rag_chain
+from src.helper import initialize
 
+
+conversational_rag_chain=initialize()
 messageRouter=APIRouter()
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 # oauth2_scheme = OAuth2AuthorizationCodeBearer(  
 #     tokenUrl="http://keycloak.kube/realms/juju/protocol/openid-connect/token",  

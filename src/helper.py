@@ -3,7 +3,6 @@ from langchain_classic.text_splitter import RecursiveCharacterTextSplitter
 from typing import List
 from langchain_classic.schema import Document
 from langchain_community.embeddings import HuggingFaceEmbeddings
-# from langchain_huggingface import HuggingFaceEmbeddings
 from src.rag_methods import get_user_history
 from dotenv import load_dotenv
 from langchain_pinecone import PineconeVectorStore
@@ -65,24 +64,11 @@ def download_hugging_face_embeddings():
     print("Embedding model loaded")
     return embeddings
 
-# def invoke_and_save(session_id, input_text,conversational_rag_chain):
-    # Save the user question with role "human"
-    # save_message(session_id, "human", input_text)
-    
-    # result = conversational_rag_chain.invoke(
-    #     {"input": input_text},
-    #     config={"configurable": {"session_id": session_id}}
-    # )["answer"]
-
-    # # Save the AI answer with role "ai"
-    # save_message(session_id, "ai", result)
-    # return result
-
 def invoke_and_save(user_id, input_text,conversational_rag_chain):
     
     result = conversational_rag_chain.invoke(
         {"input": input_text},
-        config={"configurable": {"user_id": user_id}}
+        config={"configurable": {"session_id": user_id}}
     )["answer"]
 
     return result

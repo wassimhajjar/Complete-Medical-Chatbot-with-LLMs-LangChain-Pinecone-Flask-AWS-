@@ -21,6 +21,8 @@ def load_user_history(user_id: str) -> BaseChatMessageHistory:
         pass
     finally:
         db.close()
+    
+    print("history=",chat_history)
 
     return chat_history
 

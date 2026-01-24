@@ -19,13 +19,14 @@ export const AppContextProvider = ({ children }) => {
       const { data } = await axios.get("/protected", {
         headers: { Authorization: token },
       });
+      console.log("data", data);
       if (data) {
         setUser(data.user);
       } else {
-        toast.error(data);
+        toast.error(data.detail);
       }
     } catch (error) {
-      toast.error(error);
+      toast.error(error.detail);
     }
   };
 

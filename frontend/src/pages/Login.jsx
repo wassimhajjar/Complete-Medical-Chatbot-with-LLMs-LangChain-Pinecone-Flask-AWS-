@@ -16,20 +16,20 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const url = state === "login" ? "/login" : "/signup";
+    console.log("data login0");
+
     try {
       const { data } = await axios.post(url, { name, email, password });
-      console.log("data", data);
       console.log("token", `Bearer ${data.token}`);
       if (data) {
-        console.log("data", data);
-        setToken(`Bearer ${data.token}`);
-        localStorage.setItem("token", `Bearer ${data.token}`);
-        navigate("/");
-      } else {
-        toast.error(data);
+        if (state === "login") {
+          setToken(`Bearer ${data.token}`);
+          localStorage.setItem("token", `Bearer ${data.token}`);
+          navigate("/");
+        } else setState("login");
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response.data.detail);
     }
   };
 
@@ -43,7 +43,7 @@ const Login = () => {
         {state === "login" ? "Login" : "Sign Up"}
       </p>
 
-      {state === "register" && (
+      {state === "signup" && (
         <div className="w-full">
           <p>Name</p>
 
@@ -84,7 +84,7 @@ const Login = () => {
         />
       </div>
 
-      {state === "register" ? (
+      {state === "signup" ? (
         <p>
           Already have account?{" "}
           <span
@@ -98,7 +98,7 @@ const Login = () => {
         <p>
           Create an account{" "}
           <span
-            onClick={() => setState("register")}
+            onClick={() => setState("signup")}
             className="text-purple-700 cursor-pointer"
           >
             click here
@@ -110,7 +110,7 @@ const Login = () => {
         type="submit"
         className="bg-purple-700 hover:bg-purple-800 transition-all text-white w-full py-2 rounded-md cursor-pointer"
       >
-        {state === "register" ? "Create Account" : "Login"}
+        {state === "signup" ? "Create Account" : "Login"}
       </button>
     </form>
   );

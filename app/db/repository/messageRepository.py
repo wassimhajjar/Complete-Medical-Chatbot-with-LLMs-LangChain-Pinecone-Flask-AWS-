@@ -4,10 +4,7 @@ from app.db.schemas.message import MessageInCreate
 from typing import List
 from app.core.security.authHandler import AuthHandler
 from dotenv import load_dotenv
-import os
-from typing import Annotated,Union
-from fastapi import Header,HTTPException 
-from fastapi.security import OAuth2PasswordBearer 
+from fastapi import HTTPException 
 import datetime
 from src.helper import invoke_and_save
 
