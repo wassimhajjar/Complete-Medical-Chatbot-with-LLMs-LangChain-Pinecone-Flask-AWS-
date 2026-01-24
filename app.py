@@ -8,7 +8,7 @@ from langchain_classic.chains.combine_documents import create_stuff_documents_ch
 from langchain_core.prompts import ChatPromptTemplate,MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from dotenv import load_dotenv
-from src.db_methods import get_session_history,
+from src.rag_methods import get_session_history,
 from src.prompt import *
 from src.gemini_script import RotatingGemini
 

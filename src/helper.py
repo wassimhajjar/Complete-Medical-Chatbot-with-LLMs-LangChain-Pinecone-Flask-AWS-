@@ -4,7 +4,7 @@ from typing import List
 from langchain_classic.schema import Document
 from langchain_community.embeddings import HuggingFaceEmbeddings
 # from langchain_huggingface import HuggingFaceEmbeddings
-from src.db_methods import save_message,get_session_history
+from src.rag_methods import get_user_history
 from dotenv import load_dotenv
 from langchain_pinecone import PineconeVectorStore
 import os
@@ -65,17 +65,26 @@ def download_hugging_face_embeddings():
     print("Embedding model loaded")
     return embeddings
 
-def invoke_and_save(session_id, input_text,conversational_rag_chain):
+# def invoke_and_save(session_id, input_text,conversational_rag_chain):
     # Save the user question with role "human"
-    save_message(session_id, "human", input_text)
+    # save_message(session_id, "human", input_text)
+    
+    # result = conversational_rag_chain.invoke(
+    #     {"input": input_text},
+    #     config={"configurable": {"session_id": session_id}}
+    # )["answer"]
+
+    # # Save the AI answer with role "ai"
+    # save_message(session_id, "ai", result)
+    # return result
+
+def invoke_and_save(user_id, input_text,conversational_rag_chain):
     
     result = conversational_rag_chain.invoke(
         {"input": input_text},
-        config={"configurable": {"session_id": session_id}}
+        config={"configurable": {"user_id": user_id}}
     )["answer"]
 
-    # Save the AI answer with role "ai"
-    save_message(session_id, "ai", result)
     return result
 
 def initialize():
@@ -125,10 +134,11 @@ def initialize():
 
     conversational_rag_chain = RunnableWithMessageHistory(
         rag_chain,
-        get_session_history,
+        get_user_history,
         input_messages_key="input",
         history_messages_key="chat_history",
         output_messages_key="answer",
     )
+  
     return conversational_rag_chain 
 

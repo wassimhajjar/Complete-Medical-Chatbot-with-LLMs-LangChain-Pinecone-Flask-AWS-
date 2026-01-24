@@ -1,5 +1,5 @@
-from src.db_methods import get_session_history
+from src.rag_methods import get_user_history
 import json
-session=get_session_history(2)
+user=get_user_history(2)
 
 print("session = ",session.messages)
