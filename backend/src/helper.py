@@ -13,7 +13,6 @@ from langchain_classic.chains.combine_documents import create_stuff_documents_ch
 from langchain_core.prompts import ChatPromptTemplate,MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from src.prompt import *
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 
 
@@ -58,16 +57,10 @@ def download_hugging_face_embeddings():
     """
     Download and return the HuggingFace embeddings model
     """
-    # model_name="sentence-transformers/all-MiniLM-L6-v2"
-    # model_name="all-MiniLM-L6-v2"
-    # model_name=SentenceTransformer("all-MiniLM-L6-v2")
-    
-    # embeddings= HuggingFaceEmbeddings(
-    #     model_name=model_name
-    # )
-    
-    model_name="models/embedding-001"
-    embeddings=GoogleGenerativeAIEmbeddings(model=model_name)
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+    embeddings= HuggingFaceEmbeddings(
+        model_name=model_name
+    )
     print("Embedding model loaded")
     return embeddings
 

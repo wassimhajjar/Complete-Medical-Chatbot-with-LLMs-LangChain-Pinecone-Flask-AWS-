@@ -1,28 +1,7 @@
 [project]
-name = "Medical-ChatBot"
+name = "medical-chatbot"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = [
-    "uvicorn>=0.40.0",
-]
-
-[tool.uv.workspace]
-members = [
-    "bcrypt>=5.0.0",
-    "decouple>=0.0.7",
-    "fastapi[all]>=0.128.0",
-    "jwt>=1.4.0",
-    "pyjwt[crypto]>=2.10.1",
-    "python-decouple>=3.8",
-    "sqlalchemy>=2.0.46",
-]
-
-[tool.uv.sources]
-project = { workspace = true }
-
-[dependency-groups]
-dev = [
-    "project",
-]
+dependencies = []

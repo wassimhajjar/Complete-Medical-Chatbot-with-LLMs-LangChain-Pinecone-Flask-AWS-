@@ -1,6 +1,6 @@
 langchain
 flask
-# sentence-transformers
+sentence-transformers
 pypdf
 python-dotenv
 langchain-pinecone
@@ -12,7 +12,7 @@ bcrypt>=5.0.0
 decouple>=0.0.7
 fastapi[all]>=0.128.0
 jwt>=1.4.0
-pyjwt[crypto]>=2.10.1
+pyjwt[all]>=2.10.1
 python-decouple>=3.8
 sqlalchemy>=2.0.46
 
