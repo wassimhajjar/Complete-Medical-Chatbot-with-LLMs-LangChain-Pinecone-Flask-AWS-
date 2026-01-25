@@ -22,14 +22,14 @@ app= FastAPI(title="MedicalChatbot",version="0.1.0",lifespan=lifespan)
 app.include_router(router=authRouter,tags=["auth"])
 app.include_router(dependencies=[Depends(get_current_user)],router=messageRouter,tags=["message"])
 
-
-origins = [
-    front_end_url,
-]
+#development only
+# origins = [
+#     front_end_url,
+# ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
