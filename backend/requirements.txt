@@ -8,8 +8,6 @@ langchain-openai
 langchain-community
 langchain-google-genai
 ipykernel
-psycopg2>=2.9.11
-psycopg2-binary>=2.9.11
 bcrypt>=5.0.0
 decouple>=0.0.7
 fastapi[all]>=0.128.0

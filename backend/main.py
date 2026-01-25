@@ -11,7 +11,7 @@ import os
 
 load_dotenv()
 
-front_end_url=os.getenv("FRONT_END_URL")
+# front_end_url=os.getenv("FRONT_END_URL")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_tables()
